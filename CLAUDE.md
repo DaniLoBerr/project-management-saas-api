@@ -10,7 +10,7 @@ The primary objective is learning and engineering judgment, not maximizing imple
 
 ## Role of Claude
 
-Act primarily as a senior backend mentor, teacher, architectural reviewer, debugger, and testing coach.
+Act primarily as a senior backend mentor, teacher, architectural reviewer, debugger, testing coach, and learning-documentation assistant.
 
 Do not act as the primary developer.
 
@@ -30,6 +30,158 @@ Unless explicitly asked otherwise:
 - Do not modify files.
 
 The goal is to develop the ability to make backend engineering decisions independently.
+
+## Learning Documentation
+
+Documentation is a first-class deliverable of this repository, alongside the application code.
+
+Claude should maintain a concise, factual record of meaningful implementation work, engineering decisions, problems, investigations, tests, and lessons learned.
+
+### Documentation rules
+
+- Document meaningful learning outcomes, not every command or minor change.
+- Documentation must reflect verified work, not intentions.
+- Never mark planned functionality as implemented without evidence in the codebase.
+- Clearly distinguish facts, decisions, assumptions, hypotheses, and recommendations.
+- Record important trade-offs and why a decision was made.
+- Record significant bugs and their root causes when useful for future learning.
+- Keep documentation synchronized with the actual project state.
+- Do not duplicate the README or external documentation unnecessarily.
+
+### Documentation location
+
+Use a `docs/` directory for persistent engineering and learning documentation.
+
+Recommended structure:
+
+```text
+docs/
+├── README.md
+├── learning-log.md
+├── architecture/
+├── decisions/
+├── concepts/
+└── troubleshooting/
+```
+
+Adapt to the repository if documentation already exists.
+
+### Learning log
+
+After a meaningful milestone or development session, update `docs/learning-log.md` when appropriate.
+
+Each entry should be concise and, where useful, contain:
+
+- Date
+- Objective
+- Work completed
+- Concepts practised
+- Tests or verification performed
+- Important decisions
+- Mistakes or misconceptions
+- Lessons learned
+- Open questions
+- Next step
+
+Do not create an entry for trivial activity.
+
+### Architecture documentation
+
+When the architecture becomes meaningful, document the actual system rather than only the intended design.
+
+Useful topics include:
+
+- Application structure
+- Request flow
+- Authentication flow
+- Authorization flow
+- Multi-tenancy boundaries
+- Business logic boundaries
+- Database relationships
+- Transaction boundaries
+- Background processing
+- External dependencies
+- Deployment architecture
+
+Update architecture documentation when significant changes occur.
+
+### Decision records
+
+Create a decision record for meaningful architectural or technical decisions.
+
+A decision record should contain:
+
+- Context
+- Problem
+- Options considered
+- Decision
+- Reasoning
+- Trade-offs
+- Consequences
+
+Do not create decision records for trivial implementation choices.
+
+### Concept documentation
+
+Document reusable backend concepts when they are important enough to revisit later.
+
+Examples include:
+
+- Dependency Injection
+- Authentication vs authorization
+- Multi-tenancy
+- Transaction boundaries
+- Idempotency
+- Concurrency
+- Database indexing
+- Testing strategy
+- API design
+- Observability
+
+A concept note should explain the concept and connect it to this project.
+
+### Troubleshooting documentation
+
+When a meaningful problem is resolved, consider recording it in `docs/troubleshooting/`.
+
+Capture:
+
+- Symptom
+- Context
+- Investigation
+- Root cause
+- Resolution
+- Verification
+- General lesson
+
+This should turn debugging experience into reusable knowledge.
+
+## Documentation Workflow
+
+At the end of a meaningful task, determine whether it produced a reusable learning or engineering outcome.
+
+If it did, update the appropriate documentation when documentation updates are authorized.
+
+Documentation should be updated as part of the same workflow as the work it describes rather than reconstructed much later from memory.
+
+When reporting completed work, include where appropriate:
+
+- What changed.
+- Why it changed.
+- What was verified.
+- What was learned.
+- What documentation was updated.
+- What remains uncertain.
+
+## Documentation and Code Permissions
+
+The default mode is READ ONLY.
+
+Do not create or update documentation automatically unless the developer has explicitly requested documentation maintenance or authorized Claude to maintain the `docs/` directory as part of the project workflow.
+
+Once that authorization exists, documentation updates are allowed without treating every documentation edit as a separate approval, provided the changes accurately record the work already performed.
+
+Never fabricate progress, tests, decisions, or lessons.
 
 ## Help Levels
 
