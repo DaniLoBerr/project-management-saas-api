@@ -1,419 +1,139 @@
 # Project Management SaaS API
 
-A production-oriented project management SaaS API built with **Python and FastAPI**.
+A multi-tenant REST API for managing teams, projects, and tasks — a simplified Trello/Asana-style tool. Built with **FastAPI**, with asynchronous processing, caching, observability, and deployment on **AWS** managed with **Terraform**.
 
-The project is designed to demonstrate the development of a maintainable backend application, progressing from a solid REST API foundation to authentication, authorization, multi-tenancy, automated testing, containerization, CI/CD, cloud deployment, and observability.
+This is my second backend project and the point where all the architecture pieces I've been learning separately come together: task queues, caching, OAuth2 authentication, CI/CD, standardized API design, and production observability.
 
-> **Project status: Planned — Development not started yet.**
+## 📌 Project goal
 
----
+Unlike the previous project (focused on implementation quality over a simple domain), the goal here is to **correctly integrate real backend architecture pieces** on a domain with richer relationships: organizations, teams, projects, tasks, and permissions.
 
-## Overview
+## ⚙️ Features
 
-Project Management SaaS API is a multi-tenant project management platform designed around the needs of small teams and organizations.
+### Organizations and teams
+- Each user belongs to one or more organizations (multi-tenant)
+- Team management within an organization
+- Role and permission system (owner, admin, member) — role-based access control (RBAC)
 
-Users will be able to create organizations, manage team members, create projects, organize tasks, collaborate through comments, and track changes through an audit history.
+### Projects and tasks
+- CRUD for projects within an organization
+- CRUD for tasks within a project: title, description, status, priority, assignee, due date
+- Kanban-style boards (configurable statuses: To Do / In Progress / Done)
+- Task comments
+- Task change history (basic audit trail)
 
-The main purpose of the project is not to reproduce every feature of a product such as Jira or Trello, but to use a realistic application domain to explore and demonstrate **professional backend engineering practices**.
+### Notifications (asynchronous processing)
+- Email notification when a task is assigned
+- Automatic reminders for tasks approaching their due date (periodic tasks with Celery Beat)
+- Weekly project report generation in the background, without blocking the user
 
-The project will evolve progressively alongside a structured backend learning roadmap, with a focus on depth, maintainability, testing, reliability, and production deployment.
+### Invitations
+- Invite users to an organization by email
+- Invitation acceptance flow
 
----
+## 🔒 Authentication and authorization
 
-## Planned Features
+- OAuth2 with Authorization Code + PKCE flow
+- JWT with access token and refresh token
+- Resource-level authorization: a user can only operate on organizations/projects they belong to, according to their role
 
-### Authentication
+## 🚀 Architecture and performance
 
-* User registration
-* User login
-* Password hashing
-* Token-based authentication
-* User account management
+- **Celery + Redis** as the queue system for all asynchronous processing (emails, reports, reminders)
+- **Redis as cache** on frequently-read endpoints (task listing for a project, organization dashboard)
+- **Rate limiting** per user and per organization
+- API designed following the [Zalando RESTful API Guidelines](https://opensource.zalando.com/restful-api-guidelines/): explicit versioning, consistent pagination, standardized error format, complete OpenAPI contract
 
-### Organizations & Teams
+## 🧪 Quality and reliability
 
-* Create and manage organizations
-* Organization membership
-* Invitations
-* Role-based access control
-* Organization-level permissions
+- TDD with `pytest`, unit and integration test coverage
+- Load testing with **Locust** on critical endpoints (task listing, task creation) to validate behavior under concurrency
+- Full CI/CD with GitHub Actions: tests, linting, Docker image build, and automated deployment
 
-### Projects
+## 📊 Observability
 
-* Create and manage projects
-* Project members
-* Project status
-* Project metadata
+- Structured logging
+- Traces and instrumentation with **OpenTelemetry**
+- Basic metrics dashboard in Grafana Cloud (latency, error rate, throughput per endpoint)
 
-### Tasks
+## ☁️ Infrastructure
 
-* Create, update, and delete tasks
-* Task assignment
-* Task status
-* Task priority
-* Due dates
-* Task filtering
-* Sorting and pagination
+- Deployed on AWS managed as infrastructure as code with **Terraform**
+- Docker containers, orchestrated as defined in the reference course (ECS/Fargate)
 
-### Collaboration
+## 🛠️ Tech stack
 
-* Task comments
-* User activity
-* Notifications
+| Category | Technology |
+|---|---|
+| Framework | FastAPI |
+| Database | PostgreSQL |
+| ORM | SQLAlchemy |
+| Task queues | Celery + Redis |
+| Cache | Redis |
+| Authentication | OAuth2 (Authorization Code + PKCE) + JWT |
+| Testing | Pytest + Locust |
+| Observability | OpenTelemetry + Grafana |
+| Infrastructure | Terraform + AWS (ECS/Fargate) |
+| CI/CD | GitHub Actions |
 
-### Audit & Traceability
+## 📂 Project structure
 
-* Audit log
-* Track important user actions
-* Track changes to relevant resources
-
----
-
-## Backend Engineering Goals
-
-The project will be used to explore and demonstrate backend concepts beyond basic CRUD operations.
-
-Planned areas include:
-
-* REST API design
-* Authentication
-* Authorization
-* Multi-tenancy
-* Business rules
-* Relational data modelling
-* Database transactions
-* Concurrency
-* Idempotency
-* Pagination
-* Filtering and sorting
-* Background processing
-* Error handling
-* Security
-* Reliability
-* API documentation
-* Observability
-
-Advanced functionality will only be introduced when it is justified by the project's requirements and the corresponding learning stage.
-
----
-
-## Technology Stack
-
-The planned technology stack includes:
-
-### Backend
-
-* Python
-* FastAPI
-* Pydantic
-* SQLAlchemy
-* Alembic
-
-### Database
-
-* PostgreSQL
-
-### Testing
-
-* pytest
-* HTTPX
-* pytest-asyncio
-* Unit testing
-* Integration testing
-* API testing
-* TDD
-
-### Development & DevOps
-
-* Git
-* GitHub
-* Docker
-* Docker Compose
-* CI/CD
-* Linux
-
-### Cloud
-
-* AWS
-
-### Observability
-
-* Application logging
-* Health checks
-* Monitoring
-* Error tracking
-* Request tracing where appropriate
-
-> The final AWS architecture and advanced infrastructure decisions will be defined during the cloud-development stage of the project rather than being fixed prematurely.
-
----
-
-## Architecture
-
-The project will progressively adopt a maintainable backend architecture.
-
-The initial direction is based on clear separation of responsibilities between API endpoints, business logic, data access, and infrastructure concerns.
-
-A possible high-level structure is:
-
-```text
-Client
-   │
-   ▼
-FastAPI
-   │
-   ├── Authentication / Authorization
-   │
-   ├── API Layer
-   │
-   ├── Service / Business Logic
-   │
-   └── Data Access
-           │
-           ▼
-       PostgreSQL
+```
+project-management-saas-api/
+├── app/
+│   ├── api/                # Endpoints (routers), versioned
+│   ├── models/              # SQLAlchemy models
+│   ├── schemas/              # Pydantic schemas
+│   ├── core/                 # Configuration, security, dependencies
+│   ├── services/               # Business logic
+│   ├── tasks/                    # Celery tasks
+│   └── main.py
+├── tests/
+├── load_tests/              # Locust scenarios
+├── infra/                     # Terraform
+├── alembic/
+├── docker-compose.yml
+├── Dockerfile
+└── requirements.txt
 ```
 
-The architecture will evolve as the project requirements become more complex.
+## 🏁 How to run the project
 
-Architecture decisions will be documented as the project develops.
+```bash
+# Clone the repository
+git clone https://github.com/DaniLoBerr/project-management-saas-api.git
+cd project-management-saas-api
 
----
+# Start the services (API + Celery worker + PostgreSQL + Redis)
+docker-compose up --build
 
-## Testing Strategy
+# Run migrations
+docker-compose exec web alembic upgrade head
 
-Testing will be treated as a core part of the development process rather than as a final project stage.
+# Run tests
+docker-compose exec web pytest
 
-The planned testing strategy includes:
-
-### Unit Tests
-
-Testing isolated business logic and application components.
-
-### Integration Tests
-
-Testing interactions between application components and the database.
-
-### API Tests
-
-Testing HTTP endpoints, request validation, responses, authentication, and authorization.
-
-### Edge Cases
-
-Testing scenarios such as:
-
-* Invalid input
-* Missing resources
-* Unauthorized access
-* Duplicate operations
-* Invalid state transitions
-* Conflicting updates
-* Invalid organization membership
-
-The project will follow a **TDD-oriented approach** where appropriate.
-
----
-
-## Docker
-
-Docker will be used to provide reproducible development and testing environments.
-
-The development environment is expected to include:
-
-```text
-Application
-    │
-    └── FastAPI
-          │
-          └── PostgreSQL
+# Run load test
+locust -f load_tests/locustfile.py
 ```
 
-Docker Compose will be used where appropriate to simplify local development.
+The interactive API documentation will be available at `http://localhost:8000/docs`.
 
----
+## 🕓 Project evolution
 
-## CI/CD
+Unlike the Expense Tracker, this project started out with Celery, Redis, OAuth2, CI/CD, and the API design guidelines already in place from the initial build — pieces I already had mastered from applying them in Project 1, including deployment on AWS. Even so, there were later phases of improvement on the already-running project:
 
-The project will progressively introduce CI/CD automation.
+| Phase | What was added | Motivated by |
+|---|---|---|
+| 1 | Initial build — organizations, teams, projects, tasks, async notifications, caching, OAuth2, CI/CD, standardized API design, and AWS deployment with Terraform | Everything learned up through Project 1 (Celery, Redis, OAuth2, CI/CD, Zalando Guidelines, Scalable FastAPI on AWS) |
+| 2 | Load testing + optimizations on the detected bottlenecks, validated against the real AWS environment | Locust |
+| 3 | OpenTelemetry instrumentation | OpenTelemetry |
+| 4 | PostgreSQL index and query optimization | The Art of PostgreSQL |
 
-The intended workflow is:
+## 📈 Project status
 
-```text
-Git Push
-   │
-   ▼
-Automated Checks
-   │
-   ├── Tests
-   ├── Quality Checks
-   └── Build
-         │
-         ▼
-      Deployment
-```
+🚧 Actively in development — this README will be updated as the project progresses.
 
-The final deployment workflow will depend on the AWS architecture selected during the cloud-development stage.
+## 🗺️ Context
 
----
-
-## AWS
-
-One of the main objectives of this project is to take the application beyond local development and deploy it to AWS.
-
-The cloud stage will focus on:
-
-* Production deployment
-* Application configuration
-* Secrets management
-* Database deployment
-* Networking
-* CI/CD
-* Logging
-* Monitoring
-* Health checks
-* Reliability
-
-The final AWS architecture will be determined after completing the relevant cloud-learning stage.
-
----
-
-## Development Roadmap
-
-### Phase 0 — Project Definition
-
-* [x] Define project concept
-* [x] Define initial scope
-* [x] Create repository
-* [x] Document project goals
-* [ ] Define initial requirements
-* [ ] Define data model
-
-### Phase 1 — Core API
-
-* [ ] FastAPI application setup
-* [ ] Project structure
-* [ ] Configuration management
-* [ ] Database integration
-* [ ] SQLAlchemy models
-* [ ] Alembic migrations
-* [ ] Initial REST endpoints
-* [ ] API documentation
-
-### Phase 2 — Testing & TDD
-
-* [ ] Testing infrastructure
-* [ ] Unit tests
-* [ ] Integration tests
-* [ ] API tests
-* [ ] Authentication tests
-* [ ] Authorization tests
-* [ ] TDD workflow
-
-### Phase 3 — Application Features
-
-* [ ] Users
-* [ ] Authentication
-* [ ] Organizations
-* [ ] Team members
-* [ ] Roles and permissions
-* [ ] Projects
-* [ ] Tasks
-* [ ] Comments
-* [ ] Filtering
-* [ ] Sorting
-* [ ] Pagination
-* [ ] Audit logs
-* [ ] Notifications
-
-### Phase 4 — Production Engineering
-
-* [ ] Docker
-* [ ] Docker Compose
-* [ ] CI/CD
-* [ ] Environment configuration
-* [ ] Security hardening
-* [ ] Health checks
-* [ ] Structured logging
-* [ ] Observability
-
-### Phase 5 — AWS Deployment
-
-* [ ] AWS architecture
-* [ ] Production infrastructure
-* [ ] Database deployment
-* [ ] Application deployment
-* [ ] CI/CD deployment pipeline
-* [ ] Secrets management
-* [ ] Monitoring
-* [ ] Production validation
-
-### Phase 6 — Reliability & Scalability
-
-* [ ] Performance analysis
-* [ ] Database optimization
-* [ ] Caching where justified
-* [ ] Background processing
-* [ ] Rate limiting where appropriate
-* [ ] Concurrency considerations
-* [ ] Idempotency
-* [ ] Reliability improvements
-
----
-
-## Project Principles
-
-The project follows a few core principles:
-
-### Quality over quantity
-
-The goal is not to build as many features as possible.
-
-A smaller system with solid architecture, meaningful tests, documentation, CI/CD, deployment, and observability is more valuable than a large collection of superficial features.
-
-### Progressive complexity
-
-New technologies and architectural patterns will be introduced when they solve an actual problem in the application.
-
-Technology will not be added simply to increase the number of technologies listed in the repository.
-
-### Evidence over claims
-
-The repository will distinguish between:
-
-* Planned
-* In progress
-* Implemented
-* Tested
-* Deployed
-
-Features will only be described as completed once they actually exist in the codebase.
-
-### Production mindset
-
-The project will consider not only how to make the application work, but also how to:
-
-* test it
-* secure it
-* deploy it
-* monitor it
-* debug it
-* maintain it
-* operate it reliably
-
----
-
-## Project Status
-
-**Current status: Planned**
-
-Development will begin progressively following the backend learning roadmap.
-
-The repository currently serves as the project's definition, roadmap, and technical planning space.
-
----
-
-## Author
-
-**Daniel López Berrocal**
-
-Backend development · Python · FastAPI · REST APIs · PostgreSQL · Testing · Docker · AWS
+This project is part of my personal learning roadmap to become a Backend Engineer, which you can check out on my [GitHub profile](https://github.com/DaniLoBerr).
